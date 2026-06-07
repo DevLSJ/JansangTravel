@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -15,21 +15,51 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.JansangTravel">
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+        android:theme="@style/Theme.MyApplication">
 
+        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.JansangTravel">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MyApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Separate Add & Edit Activity -->
+        <activity
+            android:name=".AddEditActivity"
+            android:exported="false"
+            android:label="여행 기록 수정 및 등록"
+            android:theme="@style/Theme.MyApplication"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Separate Detail Activity -->
+        <activity
+            android:name=".DetailActivity"
+            android:exported="false"
+            android:label="여행 추억 상세보기"
+            android:theme="@style/Theme.MyApplication" />
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
+
+        <!-- File Provider for securing image capture -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.aistudio.jansangtravel.krwqpz.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>

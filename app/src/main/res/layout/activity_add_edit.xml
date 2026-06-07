@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollViewAddEdit"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:fillViewport="true"
+    android:isScrollContainer="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top ToolBar Header Style -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="여행 기록 남기기"
+            android:textColor="#222222"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="어디서 어떤 추억을 쌓으셨나요?"
+            android:textColor="#717171"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- 1. Destination / Place Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayoutPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:hint="여행지 이름 (예: 제주도 해변)"
+            app:startIconDrawable="@drawable/ic_place"
+            app:startIconTint="#FF385C"
+            app:boxStrokeColor="#FF385C"
+            app:hintTextColor="#FF385C"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPlace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textColor="#222222"
+                android:textSize="14sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 2. Date Selector Row -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardDatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="#FFFFFF"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_calendar"
+                    android:contentDescription="Calendar Icon" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="방문 날짜 선택"
+                        android:textColor="#717171"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tvSelectedDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="날짜 선택하기"
+                        android:textColor="#222222"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 3. Photo Import Box -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPhotoBox"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="#FFFFFF"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FAFAFA">
+
+                <ImageView
+                    android:id="@+id/ivAddPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Selected Travel Image" />
+
+                <!-- Empty representation visual state -->
+                <LinearLayout
+                    android:id="@+id/layPhotoPlaceholder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_gallery"
+                        android:alpha="0.3"
+                        android:contentDescription="Gallery Icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="대표 사진 등록"
+                        android:textColor="#717171"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Async Loading Progress Indicator -->
+                <ProgressBar
+                    android:id="@+id/progressBarLoadImage"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminateTint="#FF385C" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Quick Camera / Gallery Selectors -->
+        <LinearLayout
+            android:id="@+id/layImageButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCamera"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="카메라 촬영"
+                android:textColor="#FF385C"
+                app:icon="@drawable/ic_camera"
+                app:iconTint="#FF385C"
+                app:strokeColor="#FF385C"
+                app:strokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGallery"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="갤러리 선택"
+                android:textColor="#FF385C"
+                app:icon="@drawable/ic_gallery"
+                app:iconTint="#FF385C"
+                app:strokeColor="#FF385C"
+                app:strokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+
+        <!-- 4. Location coordinates Display / Override (GPS) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardGpsBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#DDDDDD"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="#FCFCFC">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="위치 좌표 (사진에서 EXIF GPS 자동 추출)"
+                        android:textColor="#222222"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSelectFromMap"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="지도에서 선택"
+                        android:textSize="11sp"
+                        android:textColor="#FF385C"
+                        android:padding="0dp"
+                        app:icon="@drawable/ic_place"
+                        app:iconSize="14dp"
+                        app:iconPadding="4dp"
+                        app:iconTint="#FF385C"
+                        app:strokeColor="#FF385C"
+                        app:strokeWidth="1dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        android:hint="위도 (Latitude)"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLatitude"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textColor="#222222"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:hint="경도 (Longitude)"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLongitude"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textColor="#222222"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="* 사진에 GPS 정보가 없는 경우 지도가 기본 서울 시청으로 표시되며 직접 입력할 수 있습니다."
+                    android:textColor="#717171"
+                    android:textSize="10sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- "여행 추억을 설명해주세요!" Header Label -->
+        <TextView
+            android:id="@+id/tvMemoLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="여행 추억을 설명해주세요!"
+            android:textSize="14sp"
+            android:textColor="#222222"
+            android:textStyle="bold"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="4dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- 5. Memo Contents Box -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayoutMemo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="소중했던 순간의 추억을 마음껏 기록해주세요..."
+            app:boxStrokeColor="#FF385C"
+            app:hintTextColor="#FF385C"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etMemo"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:gravity="top|left"
+                android:inputType="textMultiLine"
+                android:textColor="#222222"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 6. Action Save / Close Buttons -->
+        <LinearLayout
+            android:id="@+id/layActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancel"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="취소"
+                android:textColor="#717171"
+                app:strokeColor="#CCCCCC"
+                app:strokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1.3"
+                android:layout_marginStart="8dp"
+                android:text="추억 저장하기"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                app:backgroundTint="#FF385C"
+                style="@style/Widget.MaterialComponents.Button" />
+        </LinearLayout>
+
+        <!-- Spacer to allow scrolling past the bottom when keyboard is open -->
+        <View
+            android:id="@+id/keyboardSpacer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>

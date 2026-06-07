@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:background="#FFFFFF">
+
+    <!-- Top Toolbar Header -->
+    <LinearLayout
+        android:id="@+id/layToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="◀ 뒤로가기"
+            android:textColor="#FF385C"
+            android:paddingHorizontal="8dp"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="여행 추억 상세보기"
+            android:textColor="#222222"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp" />
+
+        <TextView
+            android:id="@+id/btnEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="수정하기"
+            android:textColor="#00A699"
+            android:paddingHorizontal="12dp"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 1. Full Banner Photo Box -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:background="#FAFAFA">
+
+                <ImageView
+                    android:id="@+id/ivDetailPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Detail Image" />
+
+                <!-- Spinner during Async Bitmap Loading -->
+                <ProgressBar
+                    android:id="@+id/progressBarDetailImage"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    android:indeterminateTint="#FF385C" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- 2. Destination Place Title -->
+                <TextView
+                    android:id="@+id/tvDetailPlace"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="제주도 월정리"
+                    android:textColor="#222222"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <!-- 3. Visit Date Selector representation -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_calendar"
+                        android:contentDescription="Calendar" />
+
+                    <TextView
+                        android:id="@+id/tvDetailDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="2026-06-01"
+                        android:textColor="#717171"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- 4. Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EAEAEA"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp" />
+
+                <!-- 5. Description Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="여행 추억 이야기"
+                    android:textColor="#FF385C"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvDetailMemo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="여기에 여행 추억 이야기가 가득 담깁니다..."
+                    android:textColor="#222222"
+                    android:textSize="16sp"
+                    android:lineSpacingExtra="5dp" />
+
+                <!-- 6. Coordinates Map Section -->
+                <LinearLayout
+                    android:id="@+id/layDetailMapBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="24dp">
+
+                    <!-- Map header -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="여행 다이어리 지도 위치"
+                        android:textColor="#FF385C"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Mini Map Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#DDDDDD"
+                        app:strokeWidth="1dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <com.google.android.gms.maps.MapView
+                                android:id="@+id/mapDetailView"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" />
+
+                            <!-- Map loading spinner -->
+                            <ProgressBar
+                                android:id="@+id/progressBarDetailMap"
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:layout_gravity="center"
+                                android:indeterminateTint="#FF385C" />
+                        </FrameLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Lat, Long label text -->
+                    <TextView
+                        android:id="@+id/tvDetailCoords"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="위도: 33.4996, 경도: 126.5312"
+                        android:textColor="#717171"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

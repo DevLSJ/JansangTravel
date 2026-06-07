@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardViewTable"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#E6E6E6"
+    app:strokeWidth="1dp"
+    app:cardBackgroundColor="#FFFFFF"
+    android:focusable="true"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Banner image frame with progress bar -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#F0F0F0">
+
+            <ImageView
+                android:id="@+id/ivPhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Travel Banner Image" />
+
+            <!-- Progress Indicator during Async Bitmap processing -->
+            <ProgressBar
+                android:id="@+id/progressBarImage"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:indeterminateTint="#FF385C" />
+        </FrameLayout>
+
+        <!-- Diary Text Contents -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Row
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <!-- Wait, Row is a compose construct, in XML it is LinearLayout orientation=horizontal! Let's use horizontal LinearLayout -->
+            </Row>
+
+            <!-- Let's write standard horizontal LinearLayout for headings and location indicators -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvPlace"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="제주도 애월읍"
+                    android:textColor="#222222"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Tiny GPS coordinate tag if available -->
+                <LinearLayout
+                    android:id="@+id/layoutGpsTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="#FFF0F2"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp">
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_place"
+                        android:contentDescription="GPS Pin" />
+
+                    <TextView
+                        android:id="@+id/tvGpsCoords"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:text="GPS"
+                        android:textColor="#FF385C"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="2026.06.01 - 2026.06.05"
+                android:textColor="#717171"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvMemo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="파도 소리가 정말 아름다웠던 애월 바다 카페에서 맛있는 라떼도 마시고 인생샷도 남겼다. 꼭 다시 오고 싶다."
+                android:textColor="#484848"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:lineSpacingExtra="2dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
