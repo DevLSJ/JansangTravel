@@ -11,9 +11,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
+import androidx.lifecycle.ViewModelProvider
 import com.example.databinding.ActivityAddEditBinding
-import com.example.db.DBHelper
-import com.example.model.TravelItem
+import com.example.db.RecordEntity
+import com.example.db.RecordViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
@@ -25,13 +26,14 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class AddEditActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddEditBinding
-    private lateinit var dbHelper: DBHelper
-    private var travelItem: TravelItem? = null
+    private lateinit var viewModel: RecordViewModel
+    private var travelItem: RecordEntity? = null
 
     private var selectedPhotoUri: Uri? = null
     private var tempCameraFileUri: Uri? = null
@@ -63,14 +65,14 @@ class AddEditActivity : AppCompatActivity() {
         binding = ActivityAddEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dbHelper = DBHelper(this)
+        viewModel = ViewModelProvider(this)[RecordViewModel::class.java]
 
-        // Parse possible existing travel diary model
+        // Parse possible existing travel diary model (RecordEntity)
         travelItem = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("TRAVEL_ITEM", TravelItem::class.java)
+            intent.getSerializableExtra("TRAVEL_ITEM", RecordEntity::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getSerializableExtra("TRAVEL_ITEM") as? TravelItem
+            intent.getSerializableExtra("TRAVEL_ITEM") as? RecordEntity
         }
 
         setupUI()
@@ -80,22 +82,43 @@ class AddEditActivity : AppCompatActivity() {
     private fun setupUI() {
         if (travelItem != null) {
             // Edit Mode
-            binding.tvTitle.text = "여행 기록 수정"
+            binding.tvTitle.text = "기록 수정"
             binding.tvSubtitle.text = "지나간 아름다운 흔적을 수정합니다"
             binding.btnSave.text = "추억 수정하기"
 
             val item = travelItem!!
-            binding.etPlace.setText(item.place)
-            binding.tvSelectedDate.text = item.visitDate
+            binding.etPlace.setText(item.title)
+            
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.tvSelectedDate.text = sdf.format(Date(item.createdAt))
             binding.etMemo.setText(item.memo)
 
-            if (item.latitude != 0.0 || item.longitude != 0.0) {
-                binding.etLatitude.setText(item.latitude.toString())
-                binding.etLongitude.setText(item.longitude.toString())
+            val lat = item.latitude ?: 0.0
+            val lng = item.longitude ?: 0.0
+            if (lat != 0.0 || lng != 0.0) {
+                binding.etLatitude.setText(lat.toString())
+                binding.etLongitude.setText(lng.toString())
             }
 
-            if (!item.photoUri.isNullOrEmpty()) {
-                selectedPhotoUri = Uri.parse(item.photoUri)
+            if (item.imageType == "DRAWABLE") {
+                binding.layPhotoPlaceholder.visibility = View.GONE
+                val cleanName = (item.imageRef ?: "").substringBeforeLast('.').trim().lowercase()
+                var resolvedResId = resources.getIdentifier(cleanName, "drawable", packageName)
+                if (resolvedResId == 0) {
+                    resolvedResId = when {
+                        cleanName.contains("hallasan") -> R.drawable.sample_mountain
+                        cleanName.contains("gyeongbokgung") -> R.drawable.sample_palace
+                        cleanName.contains("haeundae") -> R.drawable.sample_beach
+                        else -> 0
+                    }
+                }
+                if (resolvedResId != 0) {
+                    binding.ivAddPhoto.setImageResource(resolvedResId)
+                } else {
+                    binding.ivAddPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
+            } else if (!item.imageUri.isNullOrEmpty()) {
+                selectedPhotoUri = Uri.parse(item.imageUri)
                 displayImage(selectedPhotoUri)
             }
         } else {
@@ -157,10 +180,8 @@ class AddEditActivity : AppCompatActivity() {
         }
 
         // Automatic scrolling when focus or click occurs on the description edit text
-        // This ensures the soft keyboard does not block the active editing experience
         binding.scrollViewAddEdit.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
             if (oldBottom > 0 && bottom < oldBottom) {
-                // Keyboard is opened, dynamically size and show spacer
                 val keyboardHeight = oldBottom - bottom
                 binding.keyboardSpacer.layoutParams.height = keyboardHeight
                 binding.keyboardSpacer.visibility = View.VISIBLE
@@ -171,7 +192,6 @@ class AddEditActivity : AppCompatActivity() {
                     }, 100)
                 }
             } else if (oldBottom > 0 && bottom > oldBottom) {
-                // Keyboard is closed, retract spacer
                 binding.keyboardSpacer.visibility = View.GONE
             }
         }
@@ -260,9 +280,10 @@ class AddEditActivity : AppCompatActivity() {
 
     private fun processSelectedImage(uri: Uri) {
         binding.progressBarLoadImage.visibility = View.VISIBLE
+        binding.btnSave.isEnabled = false
         binding.layPhotoPlaceholder.visibility = View.GONE
+        Toast.makeText(this, "사진 정보를 분석 중입니다.", Toast.LENGTH_SHORT).show()
 
-        // Run heavy copy and EXIF parsing in Coroutines background IO Thread
         CoroutineScope(Dispatchers.Main).launch {
             val localSavedUri = withContext(Dispatchers.IO) {
                 copyUriToInternalStorage(this@AddEditActivity, uri)
@@ -272,35 +293,24 @@ class AddEditActivity : AppCompatActivity() {
                 selectedPhotoUri = localSavedUri
                 displayImage(localSavedUri)
 
-                // Try to extract GPS EXIF info
-                val gpsInfo = withContext(Dispatchers.IO) {
-                    try {
-                        contentResolver.openInputStream(uri)?.use { inputStream ->
-                            val exifInterface = ExifInterface(inputStream)
-                            val latLong = exifInterface.latLong
-                            if (latLong != null && latLong.size >= 2) {
-                                Pair(latLong[0], latLong[1])
-                            } else {
-                                null
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                }
+                // Try to extract GPS EXIF info using ExifGpsExtractor
+                val gpsInfo = com.example.util.ExifGpsExtractor.extractGpsFromImageUri(this@AddEditActivity, localSavedUri)
 
                 binding.progressBarLoadImage.visibility = View.GONE
+                binding.btnSave.isEnabled = true
                 if (gpsInfo != null) {
-                    binding.etLatitude.setText(gpsInfo.first.toString())
-                    binding.etLongitude.setText(gpsInfo.second.toString())
-                    Toast.makeText(this@AddEditActivity, "사진의 EXIF 위치 데이터를 성공적으로 추출했습니다!", Toast.LENGTH_SHORT).show()
+                    binding.etLatitude.setText(String.format(Locale.US, "%.5f", gpsInfo.first))
+                    binding.etLongitude.setText(String.format(Locale.US, "%.5f", gpsInfo.second))
+                    Toast.makeText(this@AddEditActivity, "GPS 정보를 추출했습니다.", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@AddEditActivity, "사진에 GPS 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+                    binding.etLatitude.setText("")
+                    binding.etLongitude.setText("")
+                    Toast.makeText(this@AddEditActivity, "GPS 정보가 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 binding.progressBarLoadImage.visibility = View.GONE
-                Toast.makeText(this@AddEditActivity, "이미지 처리에 실패하였습니다.", Toast.LENGTH_SHORT).show()
+                binding.btnSave.isEnabled = true
+                Toast.makeText(this@AddEditActivity, "이미지 처리 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -327,7 +337,6 @@ class AddEditActivity : AppCompatActivity() {
         if (uri == null) return
         binding.layPhotoPlaceholder.visibility = View.GONE
 
-        // Use standard coroutines to load bitmap asynchronously
         CoroutineScope(Dispatchers.Main).launch {
             val bitmap = withContext(Dispatchers.IO) {
                 try {
@@ -360,46 +369,84 @@ class AddEditActivity : AppCompatActivity() {
 
         if (place.isEmpty()) {
             binding.inputLayoutPlace.error = "여행지 이름을 입력해주세요"
+            Toast.makeText(this, "제목을 입력해주세요", Toast.LENGTH_SHORT).show()
             return
         } else {
             binding.inputLayoutPlace.error = null
         }
 
-        val latitude = latString.toDoubleOrNull() ?: 0.0
-        val longitude = lngString.toDoubleOrNull() ?: 0.0
-        val photoPath = selectedPhotoUri?.toString() ?: ""
+        // Check photo selection
+        val imagePath = selectedPhotoUri?.toString() ?: ""
+        val existingImagePath = travelItem?.imageUri ?: ""
+        val finalImagePath = if (imagePath.isNotEmpty()) imagePath else existingImagePath
+        val isDrawableFallback = travelItem?.imageType == "DRAWABLE"
 
-        val success: Boolean
-        if (travelItem != null) {
-            // Update
-            val rows = dbHelper.updateTravel(
-                no = travelItem!!.no,
-                place = place,
-                visitDate = visitDate,
-                memo = memo,
-                photoUri = photoPath,
-                latitude = latitude,
-                longitude = longitude
-            )
-            success = rows > 0
-        } else {
-            // Create
-            val id = dbHelper.insertTravel(
-                place = place,
-                visitDate = visitDate,
-                memo = memo,
-                photoUri = photoPath,
-                latitude = latitude,
-                longitude = longitude
-            )
-            success = id != -1L
+        if (finalImagePath.isEmpty() && !isDrawableFallback) {
+            Toast.makeText(this, "사진을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        if (success) {
-            Toast.makeText(this, "성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show()
-            finish()
+        val latitude = latString.toDoubleOrNull()
+        val longitude = lngString.toDoubleOrNull()
+
+        val parsedDate = try {
+            dateFormatter.parse(visitDate) ?: Date()
+        } catch (e: Exception) {
+            Date()
+        }
+        val createdAt = parsedDate.time
+
+        binding.progressBarLoadImage.visibility = View.VISIBLE
+
+        if (travelItem != null) {
+            // Update mode
+            val updatedPhotoUri = if (selectedPhotoUri != null) imagePath else travelItem!!.imageUri
+            val updatedImageType = if (selectedPhotoUri != null) "URI" else travelItem!!.imageType
+            val updatedImageRef = if (selectedPhotoUri != null) imagePath else travelItem!!.imageRef
+
+            val updatedRecord = RecordEntity(
+                id = travelItem!!.id,
+                title = place,
+                memo = memo,
+                imageUri = updatedPhotoUri,
+                createdAt = createdAt,
+                latitude = latitude,
+                longitude = longitude,
+                imageType = updatedImageType,
+                imageRef = updatedImageRef
+            )
+
+            viewModel.updateRecord(updatedRecord) { rows ->
+                binding.progressBarLoadImage.visibility = View.GONE
+                if (rows > 0) {
+                    Toast.makeText(this, "성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this, "저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
         } else {
-            Toast.makeText(this, "저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            // Add mode
+            val newRecord = RecordEntity(
+                title = place,
+                memo = memo,
+                imageUri = imagePath,
+                createdAt = createdAt,
+                latitude = latitude,
+                longitude = longitude,
+                imageType = "URI",
+                imageRef = imagePath
+            )
+
+            viewModel.insertRecord(newRecord) { id ->
+                binding.progressBarLoadImage.visibility = View.GONE
+                if (id != -1L) {
+                    Toast.makeText(this, "성공적으로 저장되었습니다.", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this, "저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -408,7 +455,6 @@ class AddEditActivity : AppCompatActivity() {
         val mapView = dialogView.findViewById<com.google.android.gms.maps.MapView>(R.id.dialogMapView)
         val tvTappedCoords = dialogView.findViewById<android.widget.TextView>(R.id.tvTappedCoords)
 
-        // Parse current latitude and longitude. Default to Seoul if empty
         val currentLatStr = binding.etLatitude.text.toString().trim()
         val currentLngStr = binding.etLongitude.text.toString().trim()
         val currentLat = currentLatStr.toDoubleOrNull() ?: 37.5665
@@ -416,14 +462,12 @@ class AddEditActivity : AppCompatActivity() {
 
         var selectedLatLng = LatLng(currentLat, currentLng)
 
-        // Initialize MapView with null Bundle representing simple instanced State
         mapView.onCreate(null)
         mapView.onResume()
 
         mapView.getMapAsync { googleMap ->
             googleMap.uiSettings.isZoomControlsEnabled = true
             
-            // Add initial marker & move camera
             var marker = googleMap.addMarker(
                 MarkerOptions()
                     .position(selectedLatLng)
@@ -431,10 +475,8 @@ class AddEditActivity : AppCompatActivity() {
             )
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 15.0f))
             
-            // Format coordinates
             tvTappedCoords.text = String.format(Locale.getDefault(), "선택된 좌표: %.5f, %.5f", selectedLatLng.latitude, selectedLatLng.longitude)
 
-            // Map click listener
             googleMap.setOnMapClickListener { latLng ->
                 selectedLatLng = latLng
                 marker?.remove()
@@ -464,7 +506,6 @@ class AddEditActivity : AppCompatActivity() {
 
         val alertDialog = builder.create()
         alertDialog.setOnDismissListener {
-            // Ensure mapView lifecycle is terminated properly
             try {
                 mapView.onPause()
                 mapView.onDestroy()
@@ -477,7 +518,6 @@ class AddEditActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Clean up temp camera files if any
         try {
             tempCameraFile?.let {
                 if (it.exists()) it.delete()

@@ -32,9 +32,14 @@ class MainActivity : AppCompatActivity() {
 
         setupNavigation()
 
-        // Custom menu button listener
-        binding.btnMenu.setOnClickListener {
-            openOptionsMenu()
+        // Custom options menu button listener anchored to the options button of the header
+        binding.btnMenu.setOnClickListener { view ->
+            val popup = androidx.appcompat.widget.PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.main_option_menu, popup.menu)
+            popup.setOnMenuItemClickListener { menuItem ->
+                onOptionsItemSelected(menuItem)
+            }
+            popup.show()
         }
     }
 
@@ -82,6 +87,10 @@ class MainActivity : AppCompatActivity() {
                 ensureListVisible { listFrag?.updateSortOrder("DATE_ASC") }
                 return true
             }
+            R.id.menu_sort_title -> {
+                ensureListVisible { listFrag?.updateSortOrder("TITLE_ASC") }
+                return true
+            }
             R.id.menu_delete_all -> {
                 ensureListVisible { listFrag?.clearAllData() }
                 return true
@@ -110,8 +119,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAppInfoDialog() {
         AlertDialog.Builder(this)
-            .setTitle("JansangTravel (잔상트래블)")
-            .setMessage("버전: 1.0.0\n\n개발자: 세계 최고 Android 개발자\n\n이 앱은 다녀온 여행 기록을 지도와 함께 소중한 '잔상'으로 간직할 수 있는 가벼운 Airbnb 스타일 다이어리 애플리케이션입니다.\n\n© 2026 JansangTravel All Rights Reserved.")
+            .setTitle("Photo Record Map App")
+            .setMessage(
+                "• 앱 이름: Photo Record Map App\n" +
+                "• 개발 언어: Kotlin\n\n" +
+                "• 구현 기능:\n" +
+                "  - Fragment 2개 이상 구성\n" +
+                "  - BottomNavigationView 화면 전환\n" +
+                "  - 사진 갤러리 선택\n" +
+                "  - 카메라 촬영\n" +
+                "  - 상세 화면 사진 표시\n" +
+                "  - 옵션 메뉴: 전체 삭제, 정렬 변경, 앱 정보\n" +
+                "  - 컨텍스트 메뉴: 수정, 삭제\n" +
+                "  - AlertDialog 삭제 확인\n" +
+                "  - Coroutine 비동기 처리\n" +
+                "  - ProgressBar 표시\n" +
+                "  - 사진 GPS 추출\n" +
+                "  - 지도 API Marker 표시\n\n" +
+                "© 2026 Photo Record Map App. All Rights Reserved."
+            )
             .setPositiveButton("확인") { dialog, _ ->
                 dialog.dismiss()
             }

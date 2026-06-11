@@ -1,0 +1,79 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="200dp"
+    android:viewportWidth="400"
+    android:viewportHeight="200">
+
+    <!-- Sky Gradient -->
+    <path android:pathData="M0,0 h400 v200 h-400 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="0"
+                android:endX="200"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFE8E1" />
+                <item android:offset="1.0" android:color="#FFF5F2" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Warm Glowing Sun -->
+    <path
+        android:fillColor="#FF7A59"
+        android:pathData="M240,90 A30,30 0,1,1 240,89.9 Z" />
+
+    <!-- Distant Mountains (soft purple) -->
+    <path android:pathData="M0,200 L120,90 L260,160 L330,120 L400,180 L400,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="90"
+                android:endX="200"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#C5B4E3" />
+                <item android:offset="1.0" android:color="#A694D4" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Foreground Mountain Peaks (Halla Peak - lush green-teal) -->
+    <path android:pathData="M-50,200 L110,60 L240,160 L350,80 L480,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="60"
+                android:endX="200"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#4DB6AC" />
+                <item android:offset="1.0" android:color="#00796B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Very Front Mountain Ridge (dark emerald) -->
+    <path android:pathData="M50,200 L210,120 L320,180 L380,140 L450,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="250"
+                android:startY="120"
+                android:endX="250"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#00897B" />
+                <item android:offset="1.0" android:color="#004D40" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Tiny cute stylized trees at bottom -->
+    <path android:fillColor="#00332C" android:pathData="M80,190 L85,180 L90,190 Z" />
+    <path android:fillColor="#00332C" android:pathData="M86,192 L91,182 L96,192 Z" />
+    <path android:fillColor="#00332C" android:pathData="M160,185 L165,173 L170,185 Z" />
+    <path android:fillColor="#00332C" android:pathData="M280,190 L284,181 L288,190 Z" />
+    <path android:fillColor="#00332C" android:pathData="M286,193 L290,184 L294,193 Z" />
+</vector>

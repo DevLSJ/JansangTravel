@@ -50,14 +50,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <Row
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-                <!-- Wait, Row is a compose construct, in XML it is LinearLayout orientation=horizontal! Let's use horizontal LinearLayout -->
-            </Row>
-
             <!-- Let's write standard horizontal LinearLayout for headings and location indicators -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -1,0 +1,76 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="200dp"
+    android:viewportWidth="400"
+    android:viewportHeight="200">
+
+    <!-- Sky Gradient -->
+    <path android:pathData="M0,0 h400 v110 h-400 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="0"
+                android:endX="200"
+                android:endY="110"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFF9C4" />
+                <item android:offset="1.0" android:color="#FFE0B2" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Rising Sun in the horizon -->
+    <path
+        android:fillColor="#FF7043"
+        android:pathData="M160,110 A40,40 0,0,1 240,110 Z" />
+
+    <!-- Sea Gradient - Layer 1 (Distant deep blue) -->
+    <path android:pathData="M0,110 Q50,115 100,110 T200,110 T300,110 T400,110 L400,150 L0,150 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="110"
+                android:endX="200"
+                android:endY="150"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#1E88E5" />
+                <item android:offset="1.0" android:color="#1565C0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Sea Gradient - Layer 2 (Brighter turquoise waves) -->
+    <path android:pathData="M0,135 Q70,145 150,135 T300,135 T400,135 L400,175 L0,175 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="135"
+                android:endX="200"
+                android:endY="175"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#26A69A" />
+                <item android:offset="1.0" android:color="#00695C" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Golden Beach Sand -->
+    <path android:pathData="M0,165 Q110,180 220,165 T400,165 L400,200 L0,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="165"
+                android:endX="200"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFE082" />
+                <item android:offset="1.0" android:color="#FFB300" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Stylized cute sailboat in the horizon -->
+    <path android:fillColor="#FFFFFF" android:pathData="M290,105 L297,95 L297,105 Z" />
+    <path android:fillColor="#D84315" android:pathData="M288,106 L299,106 L297,109 L290,109 Z" />
+</vector>

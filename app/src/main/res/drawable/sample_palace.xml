@@ -1,0 +1,71 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="200dp"
+    android:viewportWidth="400"
+    android:viewportHeight="200">
+
+    <!-- Amethyst Sunset Sky Gradient -->
+    <path android:pathData="M0,0 h400 v200 h-400 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="200"
+                android:startY="0"
+                android:endX="200"
+                android:endY="200"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#F3E5F5" />
+                <item android:offset="1.0" android:color="#E1BEE7" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Glowing Yellow/Golden Lantern Moon -->
+    <path
+        android:fillColor="#FFF59D"
+        android:pathData="M310,60 A25,25 0,1,1 310,59.9 Z" />
+
+    <!-- Soft Distant Hills -->
+    <path android:pathData="M0,200 L80,140 Q150,165 220,150 T400,160 L400,200 Z" android:fillColor="#CE93D8" />
+
+    <!-- Traditional Korean Palace Building Structure (Simplified architectural outline) -->
+    <!-- Stone Base Platform -->
+    <path android:pathData="M80,200 L85,175 L315,175 L320,200 Z" android:fillColor="#78909C" />
+    <path android:pathData="M85,175 L85,172 L315,172 L315,175 Z" android:fillColor="#455A64" />
+
+    <!-- Wooden Pillars and Red Beams -->
+    <path android:pathData="M110,172 L110,135 L116,135 L116,172 Z" android:fillColor="#BF360C" />
+    <path android:pathData="M150,172 L150,135 L156,135 L156,172 Z" android:fillColor="#BF360C" />
+    <path android:pathData="M244,172 L244,135 L250,135 L250,172 Z" android:fillColor="#BF360C" />
+    <path android:pathData="M284,172 L284,135 L290,135 L290,172 Z" android:fillColor="#BF360C" />
+
+    <!-- Center Rooms & Main Gate/Doors -->
+    <path android:pathData="M165,172 L165,135 L235,135 L235,172 Z" android:fillColor="#2E7D32" />
+    <path android:pathData="M185,172 L185,145 L215,145 L215,172 Z" android:fillColor="#FFD54F" />
+
+    <!-- Dancheong Multi-color horizontal beam -->
+    <path android:pathData="M100,135 L300,135 L300,125 L100,125 Z" android:fillColor="#00695C" />
+    <path android:pathData="M100,128 L300,128 L300,125 L100,125 Z" android:fillColor="#C62828" />
+
+    <!-- Traditional Curved Giwa Roof (Elegant sweep) -->
+    <!-- Base outline curving upwards on ends -->
+    <path android:pathData="M70,125 Q90,122 130,123 Q200,125 270,123 Q310,122 330,125 L326,110 Q310,103 270,105 Q200,107 130,105 Q90,103 74,110 Z" android:fillColor="#37474F" />
+    <!-- Top Spine of Roof -->
+    <path android:pathData="M110,105 Q200,108 290,105 L285,96 Q200,99 115,96 Z" android:fillColor="#212121" />
+
+    <!-- Spring Cherry Blossom Tree Branches draping from top-left -->
+    <path android:pathData="M0,0 Q60,30 110,15 L108,12 Q58,27 0,0 Z" android:fillColor="#4E342E" />
+    <path android:pathData="M40,20 Q60,50 80,45 L78,42 Q58,47 38,17 Z" android:fillColor="#4E342E" />
+
+    <!-- Pink Blossom clusters (Circles of pink colors) -->
+    <path android:fillColor="#FF80AB" android:pathData="M50,22 A6,6 0,1,1 50,21.9 Z" />
+    <path android:fillColor="#FF4081" android:pathData="M44,25 A5,5 0,1,1 44,24.9 Z" />
+    <path android:fillColor="#FF80AB" android:pathData="M56,18 A5,5 0,1,1 56,17.9 Z" />
+    <path android:fillColor="#F50057" android:pathData="M60,26 A4,4 0,1,1 60,25.9 Z" />
+    <path android:fillColor="#FF80AB" android:pathData="M75,44 A7,7 0,1,1 75,43.9 Z" />
+    <path android:fillColor="#FF4081" android:pathData="M84,46 A6,6 0,1,1 84,45.9 Z" />
+    <path android:fillColor="#FF80AB" android:pathData="M70,50 A5,5 0,1,1 70,49.9 Z" />
+    <path android:fillColor="#F50057" android:pathData="M90,42 A4,4 0,1,1 90,41.9 Z" />
+    <path android:fillColor="#FF80AB" android:pathData="M106,16 A6,6 0,1,1 106,15.9 Z" />
+    <path android:fillColor="#FF4081" android:pathData="M114,14 A5,5 0,1,1 114,13.9 Z" />
+</vector>

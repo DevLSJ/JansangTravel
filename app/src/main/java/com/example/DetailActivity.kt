@@ -6,22 +6,25 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.databinding.ActivityDetailBinding
-import com.example.db.DBHelper
-import com.example.model.TravelItem
+import com.example.db.RecordEntity
+import com.example.db.RecordViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
-    private lateinit var dbHelper: DBHelper
+    private lateinit var viewModel: RecordViewModel
     private var travelNo: Long = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,16 +32,16 @@ class DetailActivity : AppCompatActivity() {
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dbHelper = DBHelper(this)
+        viewModel = ViewModelProvider(this)[RecordViewModel::class.java]
 
         val item = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("TRAVEL_ITEM", TravelItem::class.java)
+            intent.getSerializableExtra("TRAVEL_ITEM", RecordEntity::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getSerializableExtra("TRAVEL_ITEM") as? TravelItem
+            intent.getSerializableExtra("TRAVEL_ITEM") as? RecordEntity
         }
         if (item != null) {
-            travelNo = item.no
+            travelNo = item.id
         } else {
             finish()
             return
@@ -59,85 +62,67 @@ class DetailActivity : AppCompatActivity() {
         }
 
         binding.btnEdit.setOnClickListener {
-            // Fetch latest item to edit
-            val latestItem = dbHelper.getTravelById(travelNo)
-            if (latestItem != null) {
-                val intent = Intent(this, AddEditActivity::class.java).apply {
-                    putExtra("TRAVEL_ITEM", latestItem)
+            viewModel.getRecordById(travelNo) { latestItem ->
+                if (latestItem != null) {
+                    val intent = Intent(this, AddEditActivity::class.java).apply {
+                        putExtra("TRAVEL_ITEM", latestItem)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
             }
         }
     }
 
     private fun loadData() {
-        val item = dbHelper.getTravelById(travelNo)
-        if (item == null) {
-            finish()
-            return
-        }
-
-        binding.tvDetailPlace.text = item.place
-        binding.tvDetailDate.text = item.visitDate
-        binding.tvDetailMemo.text = item.memo
-
-        // Load photo asynchronously
-        loadPhotoAsync(item.photoUri)
-
-        // Setup mini map based on coordinates
-        if (item.latitude != 0.0 || item.longitude != 0.0) {
-            binding.layDetailMapBox.visibility = View.VISIBLE
-            binding.tvDetailCoords.text = String.format("위도(Lat): %.6f, 경도(Lng): %.6f", item.latitude, item.longitude)
-            setupMiniMap(item)
-        } else {
-            binding.layDetailMapBox.visibility = View.GONE
-        }
-    }
-
-    private fun loadPhotoAsync(photoUriStr: String?) {
-        binding.progressBarDetailImage.visibility = View.VISIBLE
-        binding.ivDetailPhoto.setImageBitmap(null)
-
-        if (photoUriStr.isNullOrEmpty()) {
-            binding.ivDetailPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
-            binding.progressBarDetailImage.visibility = View.GONE
-            return
-        }
-
-        CoroutineScope(Dispatchers.Main).launch {
-            val bitmap = withContext(Dispatchers.IO) {
-                try {
-                    val uri = Uri.parse(photoUriStr)
-                    val inputStream = contentResolver.openInputStream(uri)
-                    val options = BitmapFactory.Options().apply {
-                        inSampleSize = 2 // balance memory & quality
-                    }
-                    val bmp = BitmapFactory.decodeStream(inputStream, null, options)
-                    inputStream?.close()
-                    bmp
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
-                    null
-                }
+        viewModel.getRecordById(travelNo) { item ->
+            if (item == null) {
+                finish()
+                return@getRecordById
             }
 
-            binding.progressBarDetailImage.visibility = View.GONE
-            if (bitmap != null) {
-                binding.ivDetailPhoto.setImageBitmap(bitmap)
+            binding.tvDetailPlace.text = item.title
+            
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            binding.tvDetailDate.text = sdf.format(Date(item.createdAt))
+            binding.tvDetailMemo.text = item.memo
+
+            // Load photo asynchronously using the RecordEntity
+            loadPhotoAsync(item)
+
+            // Setup mini map based on coordinates
+            val lat = item.latitude ?: 0.0
+            val lng = item.longitude ?: 0.0
+            if (lat != 0.0 || lng != 0.0) {
+                binding.layDetailMapBox.visibility = View.VISIBLE
+                binding.tvDetailCoords.text = String.format("위도(Lat): %.6f, 경도(Lng): %.6f", lat, lng)
+                setupMiniMap(item)
             } else {
-                binding.ivDetailPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
+                binding.tvDetailCoords.text = "GPS 정보 없음"
+                binding.layDetailMapBox.visibility = View.GONE
             }
         }
     }
 
-    private fun setupMiniMap(item: TravelItem) {
+    private fun loadPhotoAsync(item: RecordEntity) {
+        com.example.util.RecordImageLoader.load(
+            context = this,
+            imageView = binding.ivDetailPhoto,
+            progressBar = binding.progressBarDetailImage,
+            record = item,
+            scope = CoroutineScope(Dispatchers.Main)
+        )
+    }
+
+    private fun setupMiniMap(item: RecordEntity) {
         binding.mapDetailView.getMapAsync { map ->
             binding.progressBarDetailMap.visibility = View.GONE
-            val position = LatLng(item.latitude, item.longitude)
+            val lat = item.latitude ?: 0.0
+            val lng = item.longitude ?: 0.0
+            val position = LatLng(lat, lng)
             map.addMarker(
                 MarkerOptions()
                     .position(position)
-                    .title(item.place)
+                    .title(item.title)
                     .snippet(item.memo)
             )
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 14.0f))
@@ -147,6 +132,11 @@ class DetailActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.mapDetailView.onStart()
+    }
+
+    override fun onResumeFragments() {
+        super.onResumeFragments()
+        loadData()
     }
 
     override fun onPause() {

@@ -1,6 +1,6 @@
 {
-  "name": "JansangTravel",
-  "description": "여행 계획 및 기록 앱 JansangTravel - Airbnb 스타일의 깔끔한 여행 일기 및 위치 추적 앱",
+  "name": "Photo Record Map App",
+  "description": "여행 계획 및 기록 앱 Photo Record Map App - 깔끔한 여행 일기 및 위치 추적 앱",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
