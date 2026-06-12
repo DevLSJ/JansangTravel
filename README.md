@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Final%20Project-FF385C?style=for-the-badge" alt="Final Project" />
 </p>
 
-안녕하세요, DEVLSJ 입니다. 지금부터 Android App 프로젝트 "Jansang Travel"에 대해 소개하겠습니다.
+Android App Project "Jansang Travel"
 ---
 
 ## 프로젝트 소개
