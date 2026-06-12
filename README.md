@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/Final%20Project-FF385C?style=for-the-badge" alt="Final Project" />
 </p>
 
+<<<<<<< HEAD
 ---
 
 ## 프로젝트 소개
@@ -178,6 +179,8 @@ APK 생성 위치:
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
+=======
+>>>>>>> origin/master
 ---
 
 ## 구현 포인트
@@ -250,4 +253,8 @@ googleMap.addMarker(
 | Developer | DevLSJ |
 | Project | Jansang Travel |
 | Type | Android 모바일 프로그래밍 기말 텀프로젝트 |
+<<<<<<< HEAD
 | Repository | https://github.com/DevLSJ/JansangTravel |
+=======
+
+>>>>>>> origin/master
