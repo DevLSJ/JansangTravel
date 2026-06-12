@@ -326,8 +326,7 @@ googleMap.addMarker(
 | Developer | DevLSJ |
 | Project | Jansang Travel |
 | Type | Android 모바일 프로그래밍 기말 텀프로젝트 |
-<<<<<<< HEAD
 | Repository | https://github.com/DevLSJ/JansangTravel |
 =======
 
->>>>>>> origin/master
+Thank you
