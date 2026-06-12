@@ -10,7 +10,6 @@
   <img src="https://img.shields.io/badge/Final%20Project-FF385C?style=for-the-badge" alt="Final Project" />
 </p>
 
-Android App Project "Jansang Travel"
 ---
 
 ## 프로젝트 소개
