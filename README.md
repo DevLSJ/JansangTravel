@@ -10,12 +10,12 @@
   <img src="https://img.shields.io/badge/Final%20Project-FF385C?style=for-the-badge" alt="Final Project" />
 </p>
 
-<<<<<<< HEAD
+안녕하세요, DEVLSJ 입니다. 지금부터 Android App 프로젝트 "Jansang Travel"에 대해 소개하겠습니다.
 ---
 
 ## 프로젝트 소개
 
-**Jansang Travel**은 여행 기록을 사진, 날짜, 메모, 위치 정보와 함께 저장하고 Google Maps에서 여행지 위치를 확인할 수 있는 Android 앱입니다.
+"Jansang Travel"은 여행 기록을 사진, 날짜, 메모, 위치 정보와 함께 저장하고 Google Maps에서 여행지 위치를 확인할 수 있는 Android 앱입니다.
 
 모바일 프로그래밍 기말 텀프로젝트로 제작되었으며, 해운대, 한라산, 경복궁 기본 여행지를 중심으로 여행 기록 목록, 상세 화면, 지도 마커, 사진 선택, SQLite 기반 데이터 저장 기능을 제공합니다.
 
