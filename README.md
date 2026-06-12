@@ -179,7 +179,7 @@ app/build/outputs/apk/debug/app-debug.apk
 ```
 
 =======
->>>>>>> origin/master
+
 ---
 
 ## 구현 포인트
