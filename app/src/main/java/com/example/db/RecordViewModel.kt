@@ -1,6 +1,7 @@
 package com.example.db
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.launch
 class RecordViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: RecordRepository
+    private val preferences = application.getSharedPreferences("jansang_travel_prefs", Context.MODE_PRIVATE)
 
     private val _records = MutableStateFlow<List<RecordEntity>>(emptyList())
     val records: StateFlow<List<RecordEntity>> = _records
@@ -23,8 +25,7 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
     private var currentSortOrder = "DATE_DESC"
 
     init {
-        val database = AppDatabase.getDatabase(application)
-        repository = RecordRepository(database.recordDao())
+        repository = RecordRepository(TravelDbHelper(application))
 
         viewModelScope.launch {
             ensureDefaultTravelSpots()
@@ -33,6 +34,10 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private suspend fun ensureDefaultTravelSpots() {
+        if (preferences.getBoolean(KEY_DEFAULT_SPOTS_SEEDED, false)) {
+            return
+        }
+
         val existing = repository.getAllRecords()
         val defaults = listOf(
             DefaultTravelSpot(
@@ -94,6 +99,8 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
                 repository.updateRecord(normalizedRecord)
             }
         }
+
+        preferences.edit().putBoolean(KEY_DEFAULT_SPOTS_SEEDED, true).apply()
     }
 
     fun loadRecords() {
@@ -150,6 +157,16 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun deleteRecords(ids: List<Long>, onComplete: (Int) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val rows = repository.deleteRecords(ids)
+            loadRecords()
+            _isLoading.value = false
+            onComplete(rows)
+        }
+    }
+
     fun deleteAllRecords(onComplete: () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -178,4 +195,8 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
         val latitude: Double,
         val longitude: Double
     )
+
+    companion object {
+        private const val KEY_DEFAULT_SPOTS_SEEDED = "default_spots_seeded"
+    }
 }

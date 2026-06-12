@@ -18,6 +18,10 @@
         android:title="전체 기록 삭제"
         app:showAsAction="never" />
     <item
+        android:id="@+id/menu_delete_selected"
+        android:title="기록 선택 삭제"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/menu_app_info"
         android:title="앱 정보"
         app:showAsAction="never" />

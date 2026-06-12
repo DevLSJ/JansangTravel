@@ -1,9 +1,9 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
-  alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.roborazzi)
-  alias(libs.plugins.secrets)
 }
 
 android {
@@ -12,12 +12,55 @@ android {
 
   defaultConfig {
     applicationId = "com.aistudio.jansangtravel.krwqpz"
-    minSdk = 24
+    minSdk = 26
     targetSdk = 36
     versionCode = 1
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    
+    // Read MAPS_API_KEY from local-only sources. Do not fall back to .env.example,
+    // because placeholder keys make Google Maps render a white map with only the logo.
+    val envFile = rootProject.file(".env")
+    val envProperties = Properties()
+    if (envFile.exists()) {
+        val stream = envFile.inputStream()
+        try {
+            envProperties.load(stream)
+        } finally {
+            stream.close()
+        }
+    }
+
+    val localPropertiesFile = rootProject.file("local.properties")
+    val localProperties = Properties()
+    if (localPropertiesFile.exists()) {
+        val stream = localPropertiesFile.inputStream()
+        try {
+            localProperties.load(stream)
+        } finally {
+            stream.close()
+        }
+    }
+
+    fun isPlaceholderMapsKey(value: String?): Boolean {
+        val key = value?.trim().orEmpty()
+        if (key.isEmpty()) return true
+        val upper = key.uppercase()
+        return upper == "YOUR_GOOGLE_MAPS_API_KEY" ||
+            upper == "REPLACE_WITH_YOUR_GOOGLE_MAPS_API_KEY" ||
+            upper == "PLACEHOLDER_KEY" ||
+            upper.contains("PLACEHOLDER")
+    }
+
+    val mapsKey = listOf(
+        envProperties.getProperty("MAPS_API_KEY"),
+        localProperties.getProperty("MAPS_API_KEY"),
+        System.getenv("MAPS_API_KEY")
+    ).firstOrNull { !isPlaceholderMapsKey(it) }?.trim().orEmpty()
+
+    manifestPlaceholders["MAPS_API_KEY"] = mapsKey
+    resValue("string", "google_maps_key", mapsKey)
   }
 
   signingConfigs {
@@ -55,19 +98,11 @@ android {
     compose = true
     viewBinding = true
     buildConfig = true
+    resValues = true
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
-// Configure the Secrets Gradle Plugin to use .env and .env.example files
-// to match the convention used in Web projects.
-secrets {
-  propertiesFileName = ".env"
-  defaultPropertiesFileName = ".env.example"
-}
-
-// Some unused dependencies are commented out below instead of being removed.
-// This makes it easy to add them back in the future if needed.
 dependencies {
   implementation("androidx.appcompat:appcompat:1.6.1")
   implementation("com.google.android.material:material:1.12.0")
@@ -76,38 +111,19 @@ dependencies {
   implementation("androidx.recyclerview:recyclerview:1.3.2")
   implementation("androidx.exifinterface:exifinterface:1.3.7")
   implementation(platform(libs.androidx.compose.bom))
-  implementation(platform(libs.firebase.bom))
-  // implementation(libs.accompanist.permissions)
   implementation(libs.androidx.activity.compose)
-  // implementation(libs.androidx.camera.camera2)
-  // implementation(libs.androidx.camera.core)
-  // implementation(libs.androidx.camera.lifecycle)
-  // implementation(libs.androidx.camera.view)
   implementation(libs.androidx.compose.material.icons.core)
-  // implementation(libs.androidx.compose.material.icons.extended)
   implementation(libs.androidx.compose.material3)
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
-  // implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
-  // implementation(libs.androidx.navigation.compose)
-  implementation(libs.androidx.room.ktx)
-  implementation(libs.androidx.room.runtime)
   implementation("com.google.android.gms:play-services-maps:19.0.0")
-  // implementation(libs.coil.compose)
-  implementation(libs.converter.moshi)
-  // implementation(libs.firebase.ai)
   implementation(libs.kotlinx.coroutines.android)
   implementation(libs.kotlinx.coroutines.core)
-  implementation(libs.logging.interceptor)
-  implementation(libs.moshi.kotlin)
-  implementation(libs.okhttp)
-  // implementation(libs.play.services.location)
-  implementation(libs.retrofit)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)
@@ -124,6 +140,4 @@ dependencies {
   androidTestImplementation(libs.androidx.runner)
   debugImplementation(libs.androidx.compose.ui.test.manifest)
   debugImplementation(libs.androidx.compose.ui.tooling)
-  "ksp"(libs.androidx.room.compiler)
-  "ksp"(libs.moshi.kotlin.codegen)
 }

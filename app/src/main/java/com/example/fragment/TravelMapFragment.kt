@@ -15,7 +15,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -178,7 +177,6 @@ class TravelMapFragment : Fragment(), OnMapReadyCallback {
         }
 
         map.clear()
-        val builder = LatLngBounds.Builder()
         var hasPoints = false
         var recentMarker: com.google.android.gms.maps.model.Marker? = null
         val recentItem = travelItems.firstOrNull()
@@ -190,27 +188,25 @@ class TravelMapFragment : Fragment(), OnMapReadyCallback {
             val lng = item.longitude ?: continue
             val position = LatLng(lat, lng)
             val dateStr = sdf.format(Date(item.createdAt))
-            val (location, description) = splitMemo(item.memo)
             
             val marker = map.addMarker(
                 MarkerOptions()
                     .position(position)
                     .title(item.title)
-                    .snippet("$location · $dateStr · $description")
+                    .snippet("$dateStr: ${item.memo}")
             )
             marker?.tag = item.id
             if (item == recentItem) {
                 recentMarker = marker
             }
-            builder.include(position)
             hasPoints = true
         }
 
         if (hasPoints && travelItems.size > 1) {
             binding.mapView.post {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.8, 127.8), 5.7f))
+                recentMarker?.showInfoWindow()
             }
-            recentMarker?.showInfoWindow()
         } else if (hasPoints && recentItem != null) {
             val recentLatLng = LatLng(recentItem.latitude ?: 0.0, recentItem.longitude ?: 0.0)
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(recentLatLng, 13.0f))
@@ -220,18 +216,6 @@ class TravelMapFragment : Fragment(), OnMapReadyCallback {
         }
         
         binding.progressBarMap.visibility = View.GONE
-    }
-
-    private fun splitMemo(memo: String): Pair<String, String> {
-        val lines = memo.lines()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-
-        return when {
-            lines.size >= 2 -> lines.first() to lines.drop(1).joinToString(" ")
-            lines.size == 1 -> lines.first() to lines.first()
-            else -> "" to ""
-        }
     }
 
     override fun onStart() {

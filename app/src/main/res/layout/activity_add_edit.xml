@@ -382,6 +382,21 @@
                 style="@style/Widget.MaterialComponents.Button" />
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDeleteRecord"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="16dp"
+            android:text="이 기록 삭제"
+            android:textColor="#D32F2F"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:icon="@drawable/ic_delete"
+            app:iconTint="#D32F2F"
+            app:strokeColor="#D32F2F"
+            app:strokeWidth="1dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
         <!-- Spacer to allow scrolling past the bottom when keyboard is open -->
         <View
             android:id="@+id/keyboardSpacer"

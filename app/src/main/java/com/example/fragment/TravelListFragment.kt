@@ -41,7 +41,6 @@ class TravelListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = ViewModelProvider(requireActivity())[RecordViewModel::class.java]
-
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
@@ -78,7 +77,7 @@ class TravelListFragment : Fragment() {
     private fun showDeleteConfirmationDialog(item: RecordEntity) {
         AlertDialog.Builder(requireContext())
             .setTitle("기록 삭제")
-            .setMessage("'${item.title}' 여행 기록을 삭제하시겠습니까?\n삭제한 내용은 복구할 수 없습니다.")
+            .setMessage("'${item.title}' 여행 기록을 삭제하시겠습니까?\n삭제하면 복구할 수 없습니다.")
             .setPositiveButton("삭제") { dialog, _ ->
                 viewModel.deleteRecord(item) { rows ->
                     val message = if (rows > 0) {
@@ -139,6 +138,66 @@ class TravelListFragment : Fragment() {
                 dialog.dismiss()
             }
             .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    fun showSelectDeleteDialog() {
+        val records = viewModel.records.value
+        if (records.isEmpty()) {
+            Toast.makeText(requireContext(), "삭제할 여행 기록이 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val labels = records.map { record ->
+            val location = record.memo.lines().firstOrNull()?.takeIf { it.isNotBlank() } ?: "위치 정보 없음"
+            "${record.title} - $location"
+        }.toTypedArray()
+        val checkedItems = BooleanArray(records.size)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("삭제할 여행 기록 선택")
+            .setMultiChoiceItems(labels, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("삭제") { dialog, _ ->
+                val selectedIds = records
+                    .filterIndexed { index, _ -> checkedItems[index] }
+                    .map { it.id }
+
+                if (selectedIds.isEmpty()) {
+                    Toast.makeText(requireContext(), "삭제할 기록을 선택해주세요.", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                    return@setPositiveButton
+                }
+
+                dialog.dismiss()
+                confirmSelectedDelete(selectedIds)
+            }
+            .create()
+            .show()
+    }
+
+    private fun confirmSelectedDelete(selectedIds: List<Long>) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("선택한 기록을 삭제할까요?")
+            .setMessage("삭제한 여행 기록은 복구할 수 없습니다.")
+            .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("삭제") { dialog, _ ->
+                viewModel.deleteRecords(selectedIds) { rows ->
+                    Toast.makeText(
+                        requireContext(),
+                        if (rows > 0) "기록이 삭제되었습니다." else "삭제된 기록이 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 dialog.dismiss()
             }
             .create()

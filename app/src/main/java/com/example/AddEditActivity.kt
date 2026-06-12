@@ -1,7 +1,9 @@
 package com.example
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.databinding.ActivityAddEditBinding
 import com.example.db.RecordEntity
@@ -59,6 +62,14 @@ class AddEditActivity : AppCompatActivity() {
         }
     }
 
+    private val cameraPermissionContract = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            openCameraIntent()
+        } else {
+            Toast.makeText(this, "카메라 권한이 거부되어 촬영을 실행할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddEditBinding.inflate(layoutInflater)
@@ -84,6 +95,7 @@ class AddEditActivity : AppCompatActivity() {
             binding.tvTitle.text = "기록 수정"
             binding.tvSubtitle.text = "지나간 아름다운 흔적을 수정합니다"
             binding.btnSave.text = "추억 수정하기"
+            binding.btnDeleteRecord.visibility = View.VISIBLE
 
             val item = travelItem!!
             binding.etPlace.setText(item.title)
@@ -125,6 +137,7 @@ class AddEditActivity : AppCompatActivity() {
             binding.tvTitle.text = "여행 기록 남기기"
             binding.tvSubtitle.text = "어디서 어떤 추억을 쌓으셨나요?"
             binding.btnSave.text = "추억 저장하기"
+            binding.btnDeleteRecord.visibility = View.GONE
 
             // Default to today
             binding.tvSelectedDate.text = dateFormatter.format(calendar.time)
@@ -164,6 +177,10 @@ class AddEditActivity : AppCompatActivity() {
         // Save Click
         binding.btnSave.setOnClickListener {
             saveDiary()
+        }
+
+        binding.btnDeleteRecord.setOnClickListener {
+            showDeleteCurrentRecordDialog()
         }
 
         // Cancel/Back Click
@@ -266,6 +283,15 @@ class AddEditActivity : AppCompatActivity() {
     }
 
     private fun launchCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            cameraPermissionContract.launch(Manifest.permission.CAMERA)
+            return
+        }
+
+        openCameraIntent()
+    }
+
+    private fun openCameraIntent() {
         try {
             tempCameraFile = File(externalCacheDir, "temp_photo_${System.currentTimeMillis()}.jpg")
             val authority = "$packageName.fileprovider"
@@ -273,7 +299,7 @@ class AddEditActivity : AppCompatActivity() {
             captureCameraContract.launch(tempCameraFileUri!!)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "카메라 실행 중 요류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "카메라 실행 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -447,6 +473,29 @@ class AddEditActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showDeleteCurrentRecordDialog() {
+        val item = travelItem ?: return
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("이 기록을 삭제할까요?")
+            .setMessage("삭제한 기록은 복구할 수 없습니다.")
+            .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("삭제") { dialog, _ ->
+                viewModel.deleteRecord(item) { rows ->
+                    if (rows > 0) {
+                        Toast.makeText(this, "기록이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this, "삭제 처리에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     private fun showMapSelectorDialog() {
