@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Photo Record Map App</string>
+    <string name="app_name">Jansang Travel</string>
+    <string name="travel_card_image">여행지 이미지</string>
+    <string name="gps_pin">GPS 위치</string>
 </resources>

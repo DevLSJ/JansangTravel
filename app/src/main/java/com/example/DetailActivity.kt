@@ -10,7 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.databinding.ActivityDetailBinding
 import com.example.db.RecordEntity
 import com.example.db.RecordViewModel
+import com.example.util.MapsApiKeyValidator
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +28,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDetailBinding
     private lateinit var viewModel: RecordViewModel
     private var travelNo: Long = -1
+    private var isDetailMapInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +50,25 @@ class DetailActivity : AppCompatActivity() {
             return
         }
 
-        binding.mapDetailView.onCreate(savedInstanceState)
+        initDetailMapIfApiKeyIsConfigured(savedInstanceState)
         setupListeners()
+    }
+
+    private fun initDetailMapIfApiKeyIsConfigured(savedInstanceState: Bundle?) {
+        val apiKey = MapsApiKeyValidator.getManifestApiKey(this)
+        if (!MapsApiKeyValidator.isConfigured(apiKey)) {
+            isDetailMapInitialized = false
+            binding.mapDetailView.visibility = View.GONE
+            binding.progressBarDetailMap.visibility = View.GONE
+            binding.tvDetailMapWarning.text = MapsApiKeyValidator.message(apiKey)
+            binding.tvDetailMapWarning.visibility = View.VISIBLE
+            return
+        }
+
+        isDetailMapInitialized = true
+        binding.tvDetailMapWarning.visibility = View.GONE
+        binding.mapDetailView.visibility = View.VISIBLE
+        binding.mapDetailView.onCreate(savedInstanceState)
     }
 
     override fun onResume() {
@@ -95,7 +115,9 @@ class DetailActivity : AppCompatActivity() {
             if (lat != 0.0 || lng != 0.0) {
                 binding.layDetailMapBox.visibility = View.VISIBLE
                 binding.tvDetailCoords.text = String.format("위도(Lat): %.6f, 경도(Lng): %.6f", lat, lng)
-                setupMiniMap(item)
+                if (isDetailMapInitialized) {
+                    setupMiniMap(item)
+                }
             } else {
                 binding.tvDetailCoords.text = "GPS 정보 없음"
                 binding.layDetailMapBox.visibility = View.GONE
@@ -116,22 +138,41 @@ class DetailActivity : AppCompatActivity() {
     private fun setupMiniMap(item: RecordEntity) {
         binding.mapDetailView.getMapAsync { map ->
             binding.progressBarDetailMap.visibility = View.GONE
+            map.mapType = GoogleMap.MAP_TYPE_NORMAL
+            map.uiSettings.isMapToolbarEnabled = false
+            map.uiSettings.isZoomControlsEnabled = true
             val lat = item.latitude ?: 0.0
             val lng = item.longitude ?: 0.0
             val position = LatLng(lat, lng)
-            map.addMarker(
-                MarkerOptions()
-                    .position(position)
-                    .title(item.title)
-                    .snippet(item.memo)
-            )
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 14.0f))
+
+            fun focusSelectedSpot() {
+                map.clear()
+                val marker = map.addMarker(
+                    MarkerOptions()
+                        .position(position)
+                        .title(item.title)
+                        .snippet(item.memo.lines().firstOrNull().orEmpty())
+                )
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 14.5f))
+                marker?.showInfoWindow()
+            }
+
+            binding.mapDetailView.post {
+                focusSelectedSpot()
+            }
+            map.setOnMapLoadedCallback {
+                binding.mapDetailView.post {
+                    focusSelectedSpot()
+                }
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
-        binding.mapDetailView.onStart()
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onStart()
+        }
     }
 
     override fun onResumeFragments() {
@@ -140,27 +181,37 @@ class DetailActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        binding.mapDetailView.onPause()
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onPause()
+        }
         super.onPause()
     }
 
     override fun onStop() {
-        binding.mapDetailView.onStop()
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onStop()
+        }
         super.onStop()
     }
 
     override fun onDestroy() {
-        binding.mapDetailView.onDestroy()
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onDestroy()
+        }
         super.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        binding.mapDetailView.onLowMemory()
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onLowMemory()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.mapDetailView.onSaveInstanceState(outState)
+        if (isDetailMapInitialized) {
+            binding.mapDetailView.onSaveInstanceState(outState)
+        }
     }
 }

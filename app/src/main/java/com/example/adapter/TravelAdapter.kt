@@ -1,8 +1,6 @@
 package com.example.adapter
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,13 +11,10 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.R
 import com.example.db.RecordEntity
+import com.example.util.RecordImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.Job
 
 class TravelAdapter(
     private val context: Context,
@@ -41,8 +36,7 @@ class TravelAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = records[position]
-        holder.bind(item)
+        holder.bind(records[position])
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
@@ -56,25 +50,25 @@ class TravelAdapter(
         private val ivPhoto: ImageView = itemView.findViewById(R.id.ivPhoto)
         private val progressBarImage: ProgressBar = itemView.findViewById(R.id.progressBarImage)
         private val tvPlace: TextView = itemView.findViewById(R.id.tvPlace)
-        private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
-        private val tvMemo: TextView = itemView.findViewById(R.id.tvMemo)
+        private val tvLocation: TextView = itemView.findViewById(R.id.tvDate)
+        private val tvDescription: TextView = itemView.findViewById(R.id.tvMemo)
         private val tvGpsCoords: TextView = itemView.findViewById(R.id.tvGpsCoords)
         private val layoutGpsTag: View = itemView.findViewById(R.id.layoutGpsTag)
-        private var imageLoadJob: kotlinx.coroutines.Job? = null
+        private var imageLoadJob: Job? = null
 
         fun cancelImageLoad() {
             imageLoadJob?.cancel()
+            imageLoadJob = null
         }
 
         fun bind(item: RecordEntity) {
-            tvPlace.text = item.title
-            
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            tvDate.text = sdf.format(Date(item.createdAt))
-            
-            tvMemo.text = item.memo
+            cancelImageLoad()
 
-            // Display GPS tags if lat/long are non-zero/valid
+            val (location, description) = splitMemo(item.memo)
+            tvPlace.text = item.title
+            tvLocation.text = location
+            tvDescription.text = description
+
             val lat = item.latitude ?: 0.0
             val lng = item.longitude ?: 0.0
             if (lat != 0.0 || lng != 0.0) {
@@ -84,17 +78,15 @@ class TravelAdapter(
                 layoutGpsTag.visibility = View.GONE
             }
 
-            // Click listener
             itemView.setOnClickListener {
                 onItemClick(item)
             }
 
-            // Context Menu / PopupMenu on Long Click
             itemView.setOnLongClickListener { view ->
                 val popup = PopupMenu(context, view)
                 popup.menu.add(0, 1, 0, "기록 수정")
                 popup.menu.add(0, 2, 0, "기록 삭제")
-                
+
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
                         1 -> {
@@ -112,14 +104,25 @@ class TravelAdapter(
                 true
             }
 
-            // Async Image loading with ProgressBar using custom Kotlin Coroutine
-            imageLoadJob = com.example.util.RecordImageLoader.load(
+            imageLoadJob = RecordImageLoader.load(
                 context = context,
                 imageView = ivPhoto,
                 progressBar = progressBarImage,
                 record = item,
                 scope = CoroutineScope(Dispatchers.Main)
             )
+        }
+
+        private fun splitMemo(memo: String): Pair<String, String> {
+            val parts = memo.lines()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
+            return when {
+                parts.size >= 2 -> parts.first() to parts.drop(1).joinToString(" ")
+                parts.size == 1 -> "" to parts.first()
+                else -> "" to ""
+            }
         }
     }
 }

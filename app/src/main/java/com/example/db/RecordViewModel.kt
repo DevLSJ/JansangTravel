@@ -3,16 +3,14 @@ package com.example.db
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RecordViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository: RecordRepository
-    
+
     private val _records = MutableStateFlow<List<RecordEntity>>(emptyList())
     val records: StateFlow<List<RecordEntity>> = _records
 
@@ -22,65 +20,79 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private var currentSortOrder = "DATE_DESC" // "DATE_DESC", "DATE_ASC", "TITLE_ASC"
+    private var currentSortOrder = "DATE_DESC"
 
     init {
         val database = AppDatabase.getDatabase(application)
         repository = RecordRepository(database.recordDao())
-        
-        // Populate default data if database is empty on start
+
         viewModelScope.launch {
-            checkAndInsertDefaultData()
+            ensureDefaultTravelSpots()
             loadRecords()
         }
     }
 
-    private suspend fun checkAndInsertDefaultData() {
-        val prefs = getApplication<Application>().getSharedPreferences("TravelAppPrefs", android.content.Context.MODE_PRIVATE)
-        val isFirstRun = prefs.getBoolean("isFirstRunRoomV2", true)
-        
-        if (isFirstRun) {
-            val existing = repository.getAllRecords()
-            if (existing.isEmpty()) {
-                // Insert default records
-                repository.insertRecord(
-                    RecordEntity(
-                        title = "한라산",
-                        memo = "제주도의 중심에 우뚝 솟은 대한민국에서 가장 높은 산으로, 사계절 아름다운 자연 경관을 자랑합니다.",
-                        imageUri = "",
-                        createdAt = 1717200000000L, // 2026-06-01
-                        latitude = 33.3617,
-                        longitude = 126.5292,
-                        imageType = "DRAWABLE",
-                        imageRef = "hallasan"
-                    )
-                )
-                repository.insertRecord(
-                    RecordEntity(
-                        title = "경복궁",
-                        memo = "조선 왕조의 법궁으로, 서울의 중심에서 한국 전통 건축의 아름다움과 역사의 기품을 간직하고 있습니다.",
-                        imageUri = "",
-                        createdAt = 1717286400000L, // 2026-06-02
-                        latitude = 37.5796,
-                        longitude = 126.9770,
-                        imageType = "DRAWABLE",
-                        imageRef = "gyeongbokgung"
-                    )
-                )
-                repository.insertRecord(
-                    RecordEntity(
-                        title = "해운대",
-                        memo = "부산을 대표하는 해수욕장으로, 넓은 백사장과 현대적인 고층 빌딩이 어우러진 해양 휴양지입니다.",
-                        imageUri = "",
-                        createdAt = 1717372800000L, // 2026-06-03
-                        latitude = 35.1587,
-                        longitude = 129.1604,
-                        imageType = "DRAWABLE",
-                        imageRef = "haeundae"
-                    )
-                )
+    private suspend fun ensureDefaultTravelSpots() {
+        val existing = repository.getAllRecords()
+        val defaults = listOf(
+            DefaultTravelSpot(
+                title = "해운대",
+                location = "부산광역시 해운대구",
+                description = "부산을 대표하는 해변 관광지로, 바다와 도시 스카이라인을 함께 즐길 수 있는 명소입니다.",
+                imageRef = "img_haeundae",
+                legacyImageRefs = setOf("haeundae", "img_haeundae"),
+                createdAt = 1717372800000L,
+                latitude = 35.1587,
+                longitude = 129.1604
+            ),
+            DefaultTravelSpot(
+                title = "한라산",
+                location = "제주특별자치도 제주시/서귀포시",
+                description = "제주도의 중심에 위치한 대한민국 최고봉으로, 사계절 자연경관이 아름다운 대표 명산입니다.",
+                imageRef = "img_hallasan",
+                legacyImageRefs = setOf("hallasan", "img_hallasan"),
+                createdAt = 1717286400000L,
+                latitude = 33.3617,
+                longitude = 126.5292
+            ),
+            DefaultTravelSpot(
+                title = "경복궁",
+                location = "서울특별시 종로구 사직로 161",
+                description = "조선 왕조의 대표 궁궐로, 전통 건축과 역사 문화를 체험할 수 있는 서울의 대표 관광지입니다.",
+                imageRef = "img_gyeongbokgung",
+                legacyImageRefs = setOf("gyeongbokgung", "img_gyeongbokgung"),
+                createdAt = 1717200000000L,
+                latitude = 37.5796,
+                longitude = 126.9770
+            )
+        )
+
+        defaults.forEach { spot ->
+            val matchingRecord = existing.firstOrNull { record ->
+                val recordImageRef = record.imageRef
+                    ?.substringBeforeLast('.')
+                    ?.trim()
+                    ?.lowercase()
+                record.title == spot.title || recordImageRef?.let { it in spot.legacyImageRefs } == true
             }
-            prefs.edit().putBoolean("isFirstRunRoomV2", false).apply()
+
+            val normalizedRecord = RecordEntity(
+                id = matchingRecord?.id ?: 0,
+                title = spot.title,
+                memo = "${spot.location}\n${spot.description}",
+                imageUri = "",
+                createdAt = spot.createdAt,
+                latitude = spot.latitude,
+                longitude = spot.longitude,
+                imageType = "DRAWABLE",
+                imageRef = spot.imageRef
+            )
+
+            if (matchingRecord == null) {
+                repository.insertRecord(normalizedRecord)
+            } else if (matchingRecord != normalizedRecord) {
+                repository.updateRecord(normalizedRecord)
+            }
         }
     }
 
@@ -96,7 +108,6 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setSortOrder(sortOrder: String) {
         currentSortOrder = sortOrder
-        // Resort current list
         _records.value = sortList(_records.value, currentSortOrder)
     }
 
@@ -144,6 +155,7 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
             _isLoading.value = true
             repository.deleteAllRecords()
             _records.value = emptyList()
+            _recordsWithGps.value = emptyList()
             _isLoading.value = false
             onComplete()
         }
@@ -155,4 +167,15 @@ class RecordViewModel(application: Application) : AndroidViewModel(application) 
             onResult(record)
         }
     }
+
+    private data class DefaultTravelSpot(
+        val title: String,
+        val location: String,
+        val description: String,
+        val imageRef: String,
+        val legacyImageRefs: Set<String>,
+        val createdAt: Long,
+        val latitude: Double,
+        val longitude: Double
+    )
 }

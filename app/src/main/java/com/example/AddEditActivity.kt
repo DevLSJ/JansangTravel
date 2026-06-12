@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModelProvider
 import com.example.databinding.ActivityAddEditBinding
 import com.example.db.RecordEntity
@@ -106,9 +105,9 @@ class AddEditActivity : AppCompatActivity() {
                 var resolvedResId = resources.getIdentifier(cleanName, "drawable", packageName)
                 if (resolvedResId == 0) {
                     resolvedResId = when {
-                        cleanName.contains("hallasan") -> R.drawable.sample_mountain
-                        cleanName.contains("gyeongbokgung") -> R.drawable.sample_palace
-                        cleanName.contains("haeundae") -> R.drawable.sample_beach
+                        cleanName.contains("hallasan") -> R.drawable.img_hallasan
+                        cleanName.contains("gyeongbokgung") -> R.drawable.img_gyeongbokgung
+                        cleanName.contains("haeundae") -> R.drawable.img_haeundae
                         else -> 0
                     }
                 }

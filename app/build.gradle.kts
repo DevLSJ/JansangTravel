@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
@@ -20,30 +18,6 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    
-    // Read MAPS_API_KEY from .env or fallback to ensure it uses the user's actual key in the manifest
-    val envFile = rootProject.file(".env")
-    val envProperties = Properties()
-    if (envFile.exists()) {
-        val stream = envFile.inputStream()
-        try {
-            envProperties.load(stream)
-        } finally {
-            stream.close()
-        }
-    } else {
-        val envExampleFile = rootProject.file(".env.example")
-        if (envExampleFile.exists()) {
-            val stream = envExampleFile.inputStream()
-            try {
-                envProperties.load(stream)
-            } finally {
-                stream.close()
-            }
-        }
-    }
-    val mapsKey = envProperties.getProperty("MAPS_API_KEY") ?: "placeholder_key"
-    manifestPlaceholders["MAPS_API_KEY"] = mapsKey
   }
 
   signingConfigs {

@@ -39,15 +39,13 @@ class TravelListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Scope ViewModel to requireActivity() so that MapFragment and ListFragment can share database states
+
         viewModel = ViewModelProvider(requireActivity())[RecordViewModel::class.java]
 
         setupRecyclerView()
 
         binding.fabAdd.setOnClickListener {
-            val intent = Intent(requireContext(), AddEditActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), AddEditActivity::class.java))
         }
 
         observeViewModel()
@@ -80,14 +78,15 @@ class TravelListFragment : Fragment() {
     private fun showDeleteConfirmationDialog(item: RecordEntity) {
         AlertDialog.Builder(requireContext())
             .setTitle("기록 삭제")
-            .setMessage("'${item.title}' 여행 기록을 정말로 완전히 삭제하시겠습니까?\n삭제된 내용은 복구할 수 없습니다.")
+            .setMessage("'${item.title}' 여행 기록을 삭제하시겠습니까?\n삭제한 내용은 복구할 수 없습니다.")
             .setPositiveButton("삭제") { dialog, _ ->
                 viewModel.deleteRecord(item) { rows ->
-                    if (rows > 0) {
-                        Toast.makeText(requireContext(), "기록이 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    val message = if (rows > 0) {
+                        "기록이 삭제되었습니다."
                     } else {
-                        Toast.makeText(requireContext(), "삭제 처리에 실패하였습니다.", Toast.LENGTH_SHORT).show()
+                        "삭제 처리에 실패했습니다."
                     }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }
@@ -99,7 +98,6 @@ class TravelListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        // Observe records state flow
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.records.collectLatest { list ->
                 adapter.updateList(list)
@@ -113,25 +111,18 @@ class TravelListFragment : Fragment() {
                 updateSubtitleCount(list.size)
             }
         }
-
-        // Observe loading state flow
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoading.collectLatest { loading ->
-                // Show intermediate feedback if needed (e.g., list transition or dialog overlay)
-            }
-        }
     }
 
     private fun updateSubtitleCount(count: Int) {
-        binding.tvHeaderSubtitle.text = "현재까지 총 ${count}개의 소중한 발자취가 기록되어 있습니다"
+        binding.tvHeaderSubtitle.text = "현재 ${count}개의 여행지가 등록되어 있습니다"
     }
 
     fun updateSortOrder(sortOrder: String) {
         viewModel.setSortOrder(sortOrder)
         val text = when (sortOrder) {
-            "DATE_DESC" -> "최신순으로 정렬되었습니다."
-            "DATE_ASC" -> "오래된순으로 정렬되었습니다."
-            "TITLE_ASC" -> "제목순으로 정렬되었습니다."
+            "DATE_DESC" -> "최신순으로 정렬했습니다."
+            "DATE_ASC" -> "오래된순으로 정렬했습니다."
+            "TITLE_ASC" -> "제목순으로 정렬했습니다."
             else -> "정렬 기준이 변경되었습니다."
         }
         Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
@@ -140,10 +131,10 @@ class TravelListFragment : Fragment() {
     fun clearAllData() {
         AlertDialog.Builder(requireContext())
             .setTitle("전체 기록 삭제")
-            .setMessage("기록된 모든 여행 기행문을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")
+            .setMessage("모든 여행 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")
             .setPositiveButton("모두 삭제") { dialog, _ ->
                 viewModel.deleteAllRecords {
-                    Toast.makeText(requireContext(), "모든 기행문이 완전히 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "모든 기록이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }

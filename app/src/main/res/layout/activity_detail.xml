@@ -178,7 +178,7 @@
                     <!-- Mini Map Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
-                        android:layout_height="180dp"
+                        android:layout_height="240dp"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp"
                         app:strokeColor="#DDDDDD"
@@ -200,6 +200,18 @@
                                 android:layout_height="32dp"
                                 android:layout_gravity="center"
                                 android:indeterminateTint="#FF385C" />
+
+                            <TextView
+                                android:id="@+id/tvDetailMapWarning"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:padding="16dp"
+                                android:text="Google Maps API Key를 확인해주세요"
+                                android:textColor="#E53935"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
                         </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
 
