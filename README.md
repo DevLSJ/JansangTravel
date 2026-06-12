@@ -14,16 +14,16 @@
 
 ## 📌 프로젝트 소개
 
-**Jansang Travel**은 사용자가 여행지의 사진, 설명, 날짜, 위치를 한 번에 확인할 수 있도록 만든 Android 여행 기록 앱입니다.  
-모바일 프로그래밍 기말 텀프로젝트로 제작되었으며, 단순한 목록형 기록 앱을 넘어 **여행지 상세 정보와 Google Maps 기반 위치 시각화**를 함께 제공합니다.
+"Jansang Travel"은 사용자가 여행지의 사진, 설명, 날짜, 위치를 한 번에 확인할 수 있도록 만든 Android 여행 기록 앱입니다.  
+모바일 프로그래밍 기말 텀프로젝트로 제작되었으며, 유저 접근성을 높이기 위해 "여행지 상세 정보와 Google Maps 기반 위치 시각화 화면"을 함께 제공합니다.
 
-이 앱은 다음과 같은 문제를 해결합니다.
+이 앱은 다음과 같은 문제를 해결하고자 개발하였습니다.
 
 - 여행지 사진과 설명이 따로 흩어져 있어 한눈에 보기 어려운 문제
 - 여행 기록의 위치 정보를 지도에서 직관적으로 확인하기 어려운 문제
 - 여러 여행지의 위치를 한 화면에서 비교하기 어려운 문제
 
-Jansang Travel은 **해운대, 한라산, 경복궁**을 대표 여행지로 구성하고, 각 여행지의 이미지와 상세 설명, 지도 마커를 연결해 여행 다이어리처럼 탐색할 수 있는 사용자 경험을 제공합니다.
+Jansang Travel은 **해운대, 한라산, 경복궁**을 대표 여행지로 구성하였습니다.
 
 ---
 
@@ -240,11 +240,8 @@ googleMap.addMarker(
 
 ## 🧭 향후 개선 방향
 
-- 사용자가 직접 커스텀 여행지를 추가하는 기능
-- 여행 기록 검색 및 필터링
 - 즐겨찾기 기능
-- GPS 기반 현재 위치 표시
-- 지도에서 직접 위치 선택 후 기록 생성
+- 지도에서 직접 위치 선택 후 AI API 기반 기록 생성 기능
 - Room DB 마이그레이션 정책 개선
 - Firebase 또는 클라우드 기반 여행 기록 동기화
 - 여행 일정 공유 기능
@@ -260,36 +257,3 @@ googleMap.addMarker(
 | Repository | https://github.com/DevLSJ/JansangTravel |
 | Type | Android 모바일 프로그래밍 기말 텀프로젝트 |
 
----
-
-## 🏷 GitHub About 추천
-
-### 짧은 설명 후보
-
-1. 여행의 추억을 기록하고 Google Maps에서 위치를 확인하는 Kotlin Android 여행 다이어리 앱
-2. 해운대, 한라산, 경복궁 여행지 정보를 이미지와 지도 마커로 보여주는 Android 텀프로젝트
-
-### 추천 Topics
-
-```text
-android
-kotlin
-android-studio
-google-maps
-google-maps-api
-travel-app
-travel-diary
-map-marker
-room-database
-xml-layout
-viewbinding
-final-project
-```
-
----
-
-## 🌟 저장소 첫인상 개선 포인트
-
-1. `screenshots/` 폴더를 만들어 README용 이미지만 정리하면 저장소 루트가 더 깔끔해집니다.
-2. 실제 API 키는 GitHub에 직접 올리지 않고 `local.properties`, Secrets Gradle Plugin, 또는 별도 sample 파일로 분리하는 것을 권장합니다.
-3. 릴리즈 APK를 GitHub Releases에 등록하면 교수님이나 면접관이 앱을 더 빠르게 확인할 수 있습니다.
